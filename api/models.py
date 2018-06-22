@@ -3,10 +3,10 @@
 total_rides = []
 
 class Rides:
-    def __init__(self,_id,route,driver,fare):
+    def __init__(self,route,driver,fare):
         '''rides class'''
             
-        _id = len(total_requests)
+        _id = len(total_rides)
         _id += 1
         self._id = _id
         self.route = route
@@ -39,7 +39,18 @@ class Rides:
         total_rides.append(new_ride)
         return new_ride
 
-
+    @staticmethod
+    def get_a_specific_ride(_id):
+        
+        _id = int(_id) 
+        if len(total_rides) > 0 and _id <= len(total_rides):
+            ride_data = {
+                '_id': total_rides[_id-1]['_id'],
+                'route': total_rides[_id-1]['route'],
+                'driver': total_rides[_id-1]['driver'],
+                'fare': total_rides[_id-1]['fare'],
+            }
+            return ride_data
 
 
 
