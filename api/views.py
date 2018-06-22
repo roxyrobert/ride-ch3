@@ -41,22 +41,25 @@ def get_all_rides():
     return jsonify({
         'status':'OK',
         'requests':total_rides,
-        'message':'Successfully returned request'
+        'message':'Successfully returned all Rides'
 }),200
- 
 
+@app.route('/api/v1/rides/<_id>',methods=['GET'])
+def get_a_specific_ride(_id):
     
-
-# @app.route('/api/v1/rides/<_id>', methods=['GET'])
-# def get_a_specific_ride(_id):
-#     ride = request.get_json(_id)
-#     if not ride:
-#         return jsonify({'message':'No ride found'})
-#     for ride in rides:
-#         if ride[_id] == _id:
-#             return jsonify({"ride":ride})
-#         else:
-#             return jsonify({"message":"id not found"})
+    results = Rides.get_a_specific_ride(_id)
+    if results:
+        return jsonify({        
+            'results':results,
+            'status':'OK',
+            'response_message':'Successfully returned Ride',
+        }),200
+    else:
+        return jsonify({        
+            'response_message':'Ride does not exist',
+            'status':'FAIL'
+}),200 
+ 
 
 
 # @app.route('/api/v1/join_ride', methods=['POST'])
