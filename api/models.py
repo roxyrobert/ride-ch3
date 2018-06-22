@@ -53,21 +53,34 @@ class Rides:
             return ride_data
 
 
+ride_requests = []
 
+class RideRequests:
+    def __init__(self,username,contact):
+        request_id = len(ride_requests)
+        request_id += 1
+        self.request_id = request_id
+        self.username = username
+        self.contact = contact
+        self.ride_requests = []
+    
+    def get_request_id(self):
+        return self.request_id
+    
+    def get_username(self):
+        return self.username
+    
+    def get_contact(self):
+        return self.contact
+    
+    def join_ride(self):
+        '''request to join a ride'''
 
-# class RideRequests:
-#     def __init__(self,request_id=None,username=None,contact=None):
-#         self.request_id = request_id
-#         self.username = username
-#         self.contact = contact
-    
-#     def get_request_id(self):
-#         return self.request_id
-    
-#     def get_username(self):
-#         return self.username
-    
-#     def get_contact(self):
-#         return self.contact
+        request_ride = {
+            'request_id':self.request_id,
+            'username':self.username,
+            'contact': self.contact
+        }
 
-# ride_requests = []
+        ride_requests.append(request_ride)
+        return request_ride
