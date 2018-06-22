@@ -62,12 +62,28 @@ def get_a_specific_ride(_id):
  
 
 
-# @app.route('/api/v1/join_ride', methods=['POST'])
-# def join_a_ride():
-#     data = request.get_json()
-#     if len(ride_requests) > 0:
-#         request_id +=1
-#     new_request = RideRequests(username =data["username"], contact =data["contact"])
-#     ride_requests.append(new_request)
-#     return jsonify({'message':'new ride request added'})
+@app.route('/rides/<rideId>/requests', methods=['POST'])
+def join_a_ride():
+    request_data = request.get_json()
+    
+    if isinstance(request_data['username'], str) and  isinstance(request_data['contact'], int):
+        
+        request_ride = RideRequests(request_data['username'],request_data['contact'])
+        request_ride.join_ride()
+        if request_ride:            
+            return jsonify({
+                'status':'OK',
+                'response_message': 'Ride request successfully created',
+                'request_id':request_ride.get_request_id()
+            }), 201
+        else:
+            return jsonify({ 
+                'status':'FAIL',
+                'response_message': 'Failed to create Ride request'
+            }), 400            
+                   
+    return jsonify({
+        'status': 'FAIL',
+        'response_message': 'Failed to create Ride. Invalid request data',
+}), 400
 
