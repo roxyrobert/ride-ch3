@@ -1,5 +1,5 @@
 from flask import Flask, jsonify, request
-from .models import Rides, total_rides
+from .models import Rides, RideRequests, total_rides
 from api import app
 
 
@@ -15,7 +15,7 @@ def create_ride():
         if new_ride:            
             return jsonify({
                 'status':'OK',
-                'response_message': 'Ride successfully created',
+                'message': 'Ride successfully created',
                 '_id':new_ride.get_id()
             }), 201
         else:
@@ -27,7 +27,7 @@ def create_ride():
     return jsonify({
         'status': 'FAIL',
         'response_message': 'Failed to create Ride. Invalid ride data',
-}), 400
+    }), 400
 
 
 @app.route('/api/v1/rides',methods=['GET'])
@@ -64,8 +64,9 @@ def get_a_specific_ride(_id):
 
 @app.route('/api/v1/rides/<_id>/requests', methods=['POST'])
 def join_a_ride(_id):
-    ride = Rides.get_a_specific_ride(_id)
+    ride = total_rides[int(_id) - 1]
     if ride:
+        
         request_data = request.get_json()
         if isinstance(request_data['username'], str) and  isinstance(request_data['contact'], int):
         
@@ -74,9 +75,9 @@ def join_a_ride(_id):
             if request_ride:            
                 return jsonify({
                     'status':'OK',
-                    'response_message': 'Ride request successfully created',
+                    'message': 'Ride request successfully created',
                     'request_id':request_ride.get_request_id(),
-                    'ride_id requested': ride.get_id
+                    'ride_id': ride.get("_id")
                 }), 201
             else:
                 return jsonify({ 
