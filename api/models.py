@@ -5,10 +5,7 @@ total_rides = []
 class Rides:
     def __init__(self,route,driver,fare):
         '''rides class'''
-            
-        _id = len(total_rides)
-        _id += 1
-        self._id = _id
+        self._id = 0
         self.route = route
         self.driver = driver
         self.fare = fare       
@@ -28,6 +25,9 @@ class Rides:
     
     def add_ride(self):
         '''create a new_ride'''
+
+        _id = len(total_rides)
+        self._id = _id + 1
 
         new_ride = {
             '_id':self._id,
@@ -57,9 +57,7 @@ ride_requests = []
 
 class RideRequests:
     def __init__(self,username,contact):
-        request_id = len(ride_requests)
-        request_id += 1
-        self.request_id = request_id
+        self.request_id = 0
         self.username = username
         self.contact = contact
         self.ride_requests = []
@@ -75,6 +73,9 @@ class RideRequests:
     
     def join_ride(self):
         '''request to join a ride'''
+
+        request_id = len(ride_requests)
+        self.request_id = request_id + 1
 
         request_ride = {
             'request_id':self.request_id,
