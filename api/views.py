@@ -62,28 +62,33 @@ def get_a_specific_ride(_id):
  
 
 
-@app.route('/rides/<rideId>/requests', methods=['POST'])
-def join_a_ride():
-    request_data = request.get_json()
-    
-    if isinstance(request_data['username'], str) and  isinstance(request_data['contact'], int):
+@app.route('/api/v1/rides/<_id>/requests', methods=['POST'])
+def join_a_ride(_id):
+    ride = Rides.get_a_specific_ride(_id)
+    if ride:
+        request_data = request.get_json()
+        if isinstance(request_data['username'], str) and  isinstance(request_data['contact'], int):
         
-        request_ride = RideRequests(request_data['username'],request_data['contact'])
-        request_ride.join_ride()
-        if request_ride:            
-            return jsonify({
-                'status':'OK',
-                'response_message': 'Ride request successfully created',
-                'request_id':request_ride.get_request_id()
-            }), 201
-        else:
-            return jsonify({ 
-                'status':'FAIL',
-                'response_message': 'Failed to create Ride request'
-            }), 400            
-                   
+            request_ride = RideRequests(request_data['username'],request_data['contact'])
+            request_ride.join_ride()
+            if request_ride:            
+                return jsonify({
+                    'status':'OK',
+                    'response_message': 'Ride request successfully created',
+                    'request_id':request_ride.get_request_id(),
+                    'ride_id requested': ride.get_id
+                }), 201
+            else:
+                return jsonify({ 
+                    'status':'FAIL',
+                    'response_message': 'Failed to create Ride request'
+                }), 400
+        return jsonify({
+        'status': 'FAIL',
+        'response_message': 'Failed to create Ride. Invalid request data',}), 400
     return jsonify({
         'status': 'FAIL',
-        'response_message': 'Failed to create Ride. Invalid request data',
-}), 400
+        'response_message': 'Ride ID not found',
+    }),400
+
 
