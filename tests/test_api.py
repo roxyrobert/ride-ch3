@@ -14,9 +14,38 @@ class RideTestCase(unittest.TestCase):
         self.client = app.test_client()
 
     def test_create_ride(self):
-        res = self.client.post('/api/v1/rides', data=json.dumps(self.sample_data), content_type='application/json')
+        res = self.client.post(
+            '/api/v1/rides',
+            data=json.dumps(self.sample_data),
+            content_type='application/json'
+        )
         res_data = json.loads(res.data.decode())
+        # assert keys
+        self.assertIn('status', res_data)
+        # assert expected data
         self.assertEqual(res_data['status'],'OK')
+        # assert expected status code
+        self.assertEqual(res.status_code,201)
+    
+    def test_create_ride_with_invalid_data(self):
+        self.sample_data = {
+            'route':123,
+            'driver':156,
+            'fare': "5000"
+        }
+        res = self.client.post(
+            '/api/v1/rides',
+            data=json.dumps(self.sample_data),
+            content_type='application/json'
+        )
+        res_data = json.loads(res.data.decode())
+        # assert keys
+        self.assertIn('status', res_data)
+        # assert expected data
+        self.assertEqual(res_data['status'],'FAIL')
+        # assert expected status code
+        self.assertEqual(res.status_code,400)
+        self.assertNotEqual(res.status_code,201)
     
     def test_get_all_rides(self):
         res = self.client.post('/api/v1/rides', data=json.dumps(self.sample_data), content_type='application/json')
