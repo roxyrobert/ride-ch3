@@ -21,12 +21,12 @@ def create_ride():
         else:
             return jsonify({ 
                 'status':'FAIL',
-                'response_message': 'Failed to create ride'
+                'message': 'Failed to create ride'
             }), 400            
                    
     return jsonify({
         'status': 'FAIL',
-        'response_message': 'Failed to create Ride. Invalid ride data',
+        'message': 'Failed to create Ride. Invalid ride data',
     }), 400
 
 
@@ -36,7 +36,7 @@ def get_all_rides():
     if len(total_rides) < 1:
         return jsonify({
             'status':'FAIL',
-            'response_message':"you have no rides"
+            'message':"you have no rides"
         }),404
     return jsonify({
         'status':'OK',
@@ -68,7 +68,7 @@ def join_a_ride(_id):
     if ride:
         
         request_data = request.get_json()
-        if isinstance(request_data['username'], str) and  isinstance(request_data['contact'], int):
+        if isinstance(request_data['username'], str) and  isinstance(request_data['contact'], str):
         
             request_ride = RideRequests(request_data['username'],request_data['contact'])
             request_ride.join_ride()
