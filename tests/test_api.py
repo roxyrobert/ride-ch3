@@ -22,6 +22,8 @@ class RideTestCase(unittest.TestCase):
         res_data = json.loads(res.data.decode())
         # assert keys
         self.assertIn('status', res_data)
+        self.assertIn('message', res_data)
+        self.assertIn('_id', res_data)
         # assert expected data
         self.assertEqual(res_data['status'],'OK')
         # assert expected status code
@@ -41,6 +43,7 @@ class RideTestCase(unittest.TestCase):
         res_data = json.loads(res.data.decode())
         # assert keys
         self.assertIn('status', res_data)
+        self.assertIn('message', res_data)
         # assert expected data
         self.assertEqual(res_data['status'],'FAIL')
         # assert expected status code
@@ -48,16 +51,39 @@ class RideTestCase(unittest.TestCase):
         self.assertNotEqual(res.status_code,201)
     
     def test_get_all_rides(self):
-        res = self.client.post('/api/v1/rides', data=json.dumps(self.sample_data), content_type='application/json')
-        res = self.client.get('/api/v1/rides', data=json.dumps(self.sample_data), content_type='application/json')
+        res = self.client.post('/api/v1/rides', 
+        data=json.dumps(self.sample_data), 
+        content_type='application/json')
+        res = self.client.get('/api/v1/rides', 
+        data=json.dumps(self.sample_data), 
+        content_type='application/json')
         res_data = json.loads(res.data.decode())
+        # assert expected data
         self.assertEqual(res_data['status'],'OK')
+        # assert expected status code
+        self.assertEqual(res.status_code,200)
+        self.assertNotEqual(res.status_code,404)
 
     def test_get_a_specific_ride(self):
         res = self.client.post('/api/v1/rides', data=json.dumps(self.sample_data), content_type='application/json')
         res = self.client.get('/api/v1/rides/1', data=json.dumps(self.sample_data), content_type='application/json')
         res_data = json.loads(res.data.decode())
+        # assert expected data
         self.assertEqual(res_data['status'],'OK')
+
+    def test_join_a_ride(self):
+        self.sample_data = {
+            'username':'robert',
+            'contact':'0702811121'
+        }
+        res = self.client.post('/api/v1/rides/1/requests', data=json.dumps(self.sample_data), content_type='application/json')
+        res_data = json.loads(res.data.decode())
+        self.assertEqual(res_data['status'],'OK')
+        # assert keys
+        self.assertIn('status', res_data)
+        self.assertIn('message', res_data)
+        self.assertIn('request_id', res_data)
+        self.assertIn('ride_id', res_data)
 
 
 
