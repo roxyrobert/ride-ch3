@@ -1,1 +1,1 @@
-# ride
+# ride [![Build Status](https://travis-ci.org/roxyrobert/ride.svg?branch=master)](https://travis-ci.org/roxyrobert/ride)
