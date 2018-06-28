@@ -61,7 +61,7 @@ class RideTestCase(unittest.TestCase):
         # assert expected data
         self.assertEqual(res_data['status'],'OK')
         # assert expected status code
-        self.assertEqual(res.status_code,200)
+        self.assertEqual(res.status_code,201)
         self.assertNotEqual(res.status_code,404)
 
     def test_get_a_specific_ride(self):
@@ -70,6 +70,8 @@ class RideTestCase(unittest.TestCase):
         res_data = json.loads(res.data.decode())
         # assert expected data
         self.assertEqual(res_data['status'],'OK')
+        # assert expected status code
+        self.assertEqual(res.status_code,201)
 
     def test_join_a_ride(self):
         self.sample_data = {
@@ -79,6 +81,8 @@ class RideTestCase(unittest.TestCase):
         res = self.client.post('/api/v1/rides/1/requests', data=json.dumps(self.sample_data), content_type='application/json')
         res_data = json.loads(res.data.decode())
         self.assertEqual(res_data['status'],'OK')
+        # assert expected status code
+        self.assertEqual(res.status_code,201)
         # assert keys
         self.assertIn('status', res_data)
         self.assertIn('message', res_data)
