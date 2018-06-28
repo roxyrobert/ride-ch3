@@ -74,7 +74,7 @@ class RideTestCase(unittest.TestCase):
     def test_join_a_ride(self):
         self.sample_data = {
             'username':'robert',
-            'contact':'0702811121'
+            'contact':'0702-811121'
         }
         res = self.client.post('/api/v1/rides/1/requests', data=json.dumps(self.sample_data), content_type='application/json')
         res_data = json.loads(res.data.decode())
