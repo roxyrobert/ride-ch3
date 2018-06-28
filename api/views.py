@@ -1,6 +1,6 @@
 from flask import Flask, jsonify, request
 from .models import Rides, RideRequests, rides
-from .validators import schema
+from .validators import schema, join_ride_schema 
 from jsonschema import validate
 from api import app
 
@@ -8,7 +8,9 @@ from api import app
 def create_ride():
     ride_data = request.get_json()
     try:
-        validate({'route':ride_data['route'],'driver':ride_data['driver'], 'fare':ride_data['fare']},schema)        
+        validate({'route':ride_data['route'],
+        'driver':ride_data['driver'], 
+        'fare':ride_data['fare']},schema)        
         new_ride = Rides(ride_data['route'],ride_data['driver'],ride_data['fare'])
         new_ride.add_ride()
         try:           
@@ -58,12 +60,10 @@ def get_a_specific_ride(_id):
             'response_message':'Ride does not exist',
             'status':'FAIL'
 }),200 
- 
 
 
 @app.route('/api/v1/rides/<_id>/requests', methods=['POST'])
 def join_a_ride(_id):
-     
     try:
         ride = rides[int(_id) - 1] #to access a ride item by its index
     except:
@@ -71,12 +71,14 @@ def join_a_ride(_id):
         'status': 'FAIL',
         'response_message': 'Ride ID not found',
     }),400
-
     request_data = request.get_json()
-    if validate({'username':request_data['username'], 'contact':request_data['contact']},join_ride_schema):
+    try:
+        validate({'username':request_data['username'], 
+        'contact':request_data['contact']},
+        join_ride_schema)
         request_ride = RideRequests(request_data['username'],request_data['contact'])
         request_ride.join_ride()
-        try:            
+        try:
             return jsonify({
                 'status':'OK',
                 'message': 'Ride request successfully created',
@@ -90,8 +92,6 @@ def join_a_ride(_id):
             }), 400
     except:
         return jsonify({
-    'status': 'FAIL',
-    'response_message': 'Failed to create Ride. Invalid request data',}), 400
-    
-
+            'status': 'FAIL',
+            'response_message': 'Failed to create Ride. Invalid request data',}), 400
 
