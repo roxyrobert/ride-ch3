@@ -43,7 +43,7 @@ def get_all_rides():
         'status':'OK',
         'requests':rides,
         'message':'Successfully returned all Rides'
-}), 200
+}), 201
 
 @app.route('/api/v1/rides/<_id>',methods=['GET'])
 def get_a_specific_ride(_id):
@@ -54,12 +54,12 @@ def get_a_specific_ride(_id):
             'results':results,
             'status':'OK',
             'response_message':'Successfully returned Ride',
-        }), 200
+        }), 201
     except:
         return jsonify({        
             'response_message':'Ride does not exist',
             'status':'FAIL'
-}), 200 
+}), 404
 
 
 @app.route('/api/v1/rides/<_id>/requests', methods=['POST'])
@@ -70,7 +70,7 @@ def join_a_ride(_id):
         return jsonify({
         'status': 'FAIL',
         'response_message': 'Ride ID not found',
-    }),400
+    }),404
     request_data = request.get_json()
     try:
         validate({'username':request_data['username'], 
