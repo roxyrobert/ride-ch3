@@ -1,30 +1,29 @@
 from flask import Flask, jsonify, request
-from .models import Rides, RideRequests, total_rides
+from .models import Rides, RideRequests, rides
+from .validators import schema
+from jsonschema import validate
 from api import app
-
 
 @app.route('/api/v1/rides' ,methods= ['POST'])
 def create_ride():
-   
     ride_data = request.get_json()
-    
-    if isinstance(ride_data['route'], str) and  isinstance(ride_data['driver'], str) and isinstance(ride_data['fare'], int):
-        
+    try:
+        validate({'route':ride_data['route'],'driver':ride_data['driver'], 'fare':ride_data['fare']},schema)        
         new_ride = Rides(ride_data['route'],ride_data['driver'],ride_data['fare'])
         new_ride.add_ride()
-        if new_ride:            
+        try:           
             return jsonify({
                 'status':'OK',
                 'message': 'Ride successfully created',
                 '_id':new_ride.get_id()
             }), 201
-        else:
+        except:
             return jsonify({ 
                 'status':'FAIL',
                 'message': 'Failed to create ride'
-            }), 400            
-                   
-    return jsonify({
+            }), 400                         
+    except:
+        return jsonify({
         'status': 'FAIL',
         'message': 'Failed to create Ride. Invalid ride data',
     }), 400
@@ -33,14 +32,14 @@ def create_ride():
 @app.route('/api/v1/rides',methods=['GET'])
 def get_all_rides():
  
-    if len(total_rides) < 1:
+    if len(rides) < 1:
         return jsonify({
             'status':'FAIL',
             'message':"you have no rides"
         }),404
     return jsonify({
         'status':'OK',
-        'requests':total_rides,
+        'requests':rides,
         'message':'Successfully returned all Rides'
 }),200
 
@@ -64,7 +63,7 @@ def get_a_specific_ride(_id):
 
 @app.route('/api/v1/rides/<_id>/requests', methods=['POST'])
 def join_a_ride(_id):
-    ride = total_rides[int(_id) - 1]
+    ride = rides[int(_id) - 1]
     if ride:
         
         request_data = request.get_json()
