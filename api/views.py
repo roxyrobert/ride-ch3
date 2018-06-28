@@ -47,13 +47,13 @@ def get_all_rides():
 def get_a_specific_ride(_id):
     
     results = Rides.get_a_specific_ride(_id)
-    if results:
+    try:
         return jsonify({        
             'results':results,
             'status':'OK',
             'response_message':'Successfully returned Ride',
         }),200
-    else:
+    except:
         return jsonify({        
             'response_message':'Ride does not exist',
             'status':'FAIL'
@@ -63,32 +63,35 @@ def get_a_specific_ride(_id):
 
 @app.route('/api/v1/rides/<_id>/requests', methods=['POST'])
 def join_a_ride(_id):
-    ride = rides[int(_id) - 1]
-    if ride:
-        
-        request_data = request.get_json()
-        if isinstance(request_data['username'], str) and  isinstance(request_data['contact'], str):
-        
-            request_ride = RideRequests(request_data['username'],request_data['contact'])
-            request_ride.join_ride()
-            if request_ride:            
-                return jsonify({
-                    'status':'OK',
-                    'message': 'Ride request successfully created',
-                    'request_id':request_ride.get_request_id(),
-                    'ride_id': ride.get("_id")
-                }), 201
-            else:
-                return jsonify({ 
-                    'status':'FAIL',
-                    'response_message': 'Failed to create Ride request'
-                }), 400
+     
+    try:
+        ride = rides[int(_id) - 1] #to access a ride item by its index
+    except:
         return jsonify({
-        'status': 'FAIL',
-        'response_message': 'Failed to create Ride. Invalid request data',}), 400
-    return jsonify({
         'status': 'FAIL',
         'response_message': 'Ride ID not found',
     }),400
+
+    request_data = request.get_json()
+    if validate({'username':request_data['username'], 'contact':request_data['contact']},join_ride_schema):
+        request_ride = RideRequests(request_data['username'],request_data['contact'])
+        request_ride.join_ride()
+        try:            
+            return jsonify({
+                'status':'OK',
+                'message': 'Ride request successfully created',
+                'request_id':request_ride.get_request_id(),
+                'ride_id': ride.get("_id")
+            }), 201
+        except:
+            return jsonify({ 
+                'status':'FAIL',
+                'response_message': 'Failed to create Ride request'
+            }), 400
+    except:
+        return jsonify({
+    'status': 'FAIL',
+    'response_message': 'Failed to create Ride. Invalid request data',}), 400
+    
 
 
