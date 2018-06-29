@@ -3,8 +3,9 @@ from flask import Flask, jsonify, request
 
 rides = []
 
+
 class Rides:
-    
+
     def __init__(self, route, driver, fare):
         rides = []
         '''rides class'''
@@ -12,7 +13,6 @@ class Rides:
         self.route = route
         self.driver = driver
         self.fare = fare
-
 
     def get_id(self):
         return self._id
@@ -56,10 +56,9 @@ class Rides:
             return ride_data
         else:
             return jsonify({
-            'status': 'FAIL',
-            'response_message': 'Ride ID not found',
+                'status': 'FAIL',
+                'response_message': 'Ride ID not found',
             }), 404
-
 
 
 ride_requests = []
@@ -70,7 +69,6 @@ class RideRequests:
         self.request_id = 0
         self.username = username
         self.contact = contact
-        
 
     def get_request_id(self):
         return self.request_id
