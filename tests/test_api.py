@@ -62,7 +62,7 @@ class RideTestCase(unittest.TestCase):
         # assert expected data
         self.assertEqual(res_data['status'], 'OK')
         # assert expected status code
-        self.assertEqual(res.status_code, 201)
+        self.assertEqual(res.status_code, 200)
         self.assertNotEqual(res.status_code, 404)
 
     def test_get_a_specific_ride(self):
@@ -76,7 +76,7 @@ class RideTestCase(unittest.TestCase):
         # assert expected data
         self.assertEqual(res_data['status'], 'OK')
         # assert expected status code
-        self.assertEqual(res.status_code, 201)
+        self.assertEqual(res.status_code, 200)
 
     def test_join_a_ride(self):
         self.sample_data = {
