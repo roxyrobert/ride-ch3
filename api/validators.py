@@ -1,20 +1,20 @@
 from jsonschema import validate
 
 schema = {
-    "type":"object",
+    "type": "object",
     "properties": {
-        "route":{"type": "string"},
+        "route": {"type": "string"},
         "driver": {"type": "string"},
         "fare": {"type": "integer"}
     },
-    "required":["route", "driver", "fare"]
+    "required": ["route", "driver", "fare"]
 }
 
 join_ride_schema = {
-    "type":"object",
+    "type": "object",
     "properties": {
-        "username":{"type":"string"},
-        "contact":{"type":"string", "pattern":"^[0-9]{4}-[0-9]{6}"}
+        "username": {"type": "string"},
+        "contact": {"type": "string", "pattern": "^[0-9]{4}-[0-9]{6}"}
     },
-    "required":["username", "contact"]
+    "required": ["username", "contact"]
 }
