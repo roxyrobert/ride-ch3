@@ -1,16 +1,18 @@
+from flask import Flask, jsonify, request
 
 
 rides = []
 
-
 class Rides:
+    
     def __init__(self, route, driver, fare):
+        rides = []
         '''rides class'''
         self._id = 0
         self.route = route
         self.driver = driver
         self.fare = fare
-        self.rides = []
+
 
     def get_id(self):
         return self._id
@@ -44,7 +46,7 @@ class Rides:
     def get_a_specific_ride(_id):
 
         _id = int(_id)
-        if len(rides) > 0 and _id <= len(rides):
+        if _id > 0 and _id <= len(rides):                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            
             ride_data = {
                 '_id': rides[_id-1]['_id'],
                 'route': rides[_id-1]['route'],
@@ -52,6 +54,12 @@ class Rides:
                 'fare': rides[_id-1]['fare'],
             }
             return ride_data
+        else:
+            return jsonify({
+            'status': 'FAIL',
+            'response_message': 'Ride ID not found',
+            }), 404
+
 
 
 ride_requests = []
@@ -62,7 +70,7 @@ class RideRequests:
         self.request_id = 0
         self.username = username
         self.contact = contact
-        self.ride_requests = []
+        
 
     def get_request_id(self):
         return self.request_id
