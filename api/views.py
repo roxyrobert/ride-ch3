@@ -5,6 +5,7 @@ from jsonschema import validate
 from api import app
 
 @app.route('/api/v1/rides' ,methods= ['POST'])
+# This endpoint creates a new ride and appends it to the rides list
 def create_ride():
     ride_data = request.get_json()
     try:
@@ -32,6 +33,7 @@ def create_ride():
 
 
 @app.route('/api/v1/rides',methods=['GET'])
+# This endpoint gets all rides
 def get_all_rides():
  
     if len(rides) < 1:
@@ -46,8 +48,8 @@ def get_all_rides():
 }), 201
 
 @app.route('/api/v1/rides/<_id>',methods=['GET'])
-def get_a_specific_ride(_id):
-    
+# This endpoint gets a specific ride by id
+def get_a_specific_ride(_id): 
     results = Rides.get_a_specific_ride(_id)
     try:
         return jsonify({        
