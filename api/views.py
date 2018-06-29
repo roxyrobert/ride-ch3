@@ -1,99 +1,103 @@
 from flask import Flask, jsonify, request
 from .models import Rides, RideRequests, rides
-from .validators import schema, join_ride_schema 
+from .validators import schema, join_ride_schema
 from jsonschema import validate
 from api import app
 
-@app.route('/api/v1/rides' ,methods= ['POST'])
+
+@app.route('/api/v1/rides', methods=['POST'])
 # This endpoint creates a new ride and appends it to the rides list
 def create_ride():
     ride_data = request.get_json()
     try:
-        validate({'route':ride_data['route'],
-        'driver':ride_data['driver'], 
-        'fare':ride_data['fare']},schema)        
-        new_ride = Rides(ride_data['route'],ride_data['driver'],ride_data['fare'])
+        validate({'route': ride_data['route'],
+                 'driver': ride_data['driver'],
+                  'fare': ride_data['fare']}, schema)
+        new_ride = Rides(ride_data['route'], ride_data['driver'],
+                         ride_data['fare'])
         new_ride.add_ride()
-        try:           
+        try:
             return jsonify({
-                'status':'OK',
+                'status': 'OK',
                 'message': 'Ride successfully created',
-                '_id':new_ride.get_id()
+                '_id': new_ride.get_id()
             }), 201
         except:
             return jsonify({ 
-                'status':'FAIL',
+                'status': 'FAIL',
                 'message': 'Failed to create ride'
-            }), 400                         
+            }), 400
     except:
         return jsonify({
-        'status': 'FAIL',
-        'message': 'Failed to create Ride. Invalid ride data',
-    }), 400
+            'status': 'FAIL',
+            'message': 'Failed to create Ride. Invalid ride data',
+            }), 400
 
 
-@app.route('/api/v1/rides',methods=['GET'])
+@app.route('/api/v1/rides', methods=['GET'])
 # This endpoint gets all rides
 def get_all_rides():
- 
+
     if len(rides) < 1:
         return jsonify({
-            'status':'FAIL',
-            'message':"you have no rides"
+            'status': 'FAIL',
+            'message': "you have no rides"
         }), 404
     return jsonify({
-        'status':'OK',
-        'requests':rides,
-        'message':'Successfully returned all Rides'
-}), 201
+        'status': 'OK',
+        'requests': rides,
+        'message': 'Successfully returned all Rides'
+        }), 200
 
-@app.route('/api/v1/rides/<_id>',methods=['GET'])
+
+@app.route('/api/v1/rides/<_id>', methods=['GET'])
 # This endpoint gets a specific ride by id
-def get_a_specific_ride(_id): 
+def get_a_specific_ride(_id):
     results = Rides.get_a_specific_ride(_id)
     try:
-        return jsonify({        
-            'results':results,
-            'status':'OK',
-            'response_message':'Successfully returned Ride',
-        }), 201
+        return jsonify({
+            'results': results,
+            'status': 'OK',
+            'response_message': 'Successfully returned Ride',
+        }), 200
     except:
         return jsonify({        
-            'response_message':'Ride does not exist',
-            'status':'FAIL'
-}), 404
+            'response_message': 'Ride does not exist',
+            'status': 'FAIL'
+        }), 404
 
 
 @app.route('/api/v1/rides/<_id>/requests', methods=['POST'])
 def join_a_ride(_id):
     try:
-        ride = rides[int(_id) - 1] #to access a ride item by its index
+        ride = rides[int(_id) - 1]  # to access a ride item by its index
     except:
         return jsonify({
-        'status': 'FAIL',
-        'response_message': 'Ride ID not found',
-    }),404
+            'status': 'FAIL',
+            'response_message': 'Ride ID not found',
+            }), 404
     request_data = request.get_json()
     try:
-        validate({'username':request_data['username'], 
-        'contact':request_data['contact']},
-        join_ride_schema)
-        request_ride = RideRequests(request_data['username'], request_data['contact'])
+        validate({'username': request_data['username'], 
+                 'contact': request_data['contact']},
+                 join_ride_schema)
+        request_ride = RideRequests(request_data['username'],
+                                    request_data['contact'])
         request_ride.join_ride()
         try:
             return jsonify({
-                'status':'OK',
+                'status': 'OK',
                 'message': 'Ride request successfully created',
-                'request_id':request_ride.get_request_id(),
+                'request_id': request_ride.get_request_id(),
                 'ride_id': ride.get("_id")
             }), 201
         except:
             return jsonify({ 
-                'status':'FAIL',
+                'status': 'FAIL',
                 'response_message': 'Failed to create Ride request'
             }), 400
     except:
         return jsonify({
-            'status' : 'FAIL',
-            'response_message': 'Failed to create Ride. Invalid request data', }), 400
-
+            'status': 'FAIL',
+            'response_message': 'Failed to create Ride. Invalid request data',
+            }), 400
