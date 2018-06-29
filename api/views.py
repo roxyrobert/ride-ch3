@@ -45,15 +45,17 @@ def get_all_rides():
         }), 404
     return jsonify({
         'status': 'OK',
-        'requests': rides,
+        'rides': rides,
         'message': 'Successfully returned all Rides'
         }), 200
 
 
 @app.route('/api/v1/rides/<_id>', methods=['GET'])
 # This endpoint gets a specific ride by id
-def get_a_specific_ride(_id):
-    results = Rides.get_a_specific_ride(_id)
+def get_a_specific_ride(_id):                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             
+
+    results = Rides.get_a_specific_ride(_id)  # to get a ride by id
+    
     try:
         return jsonify({
             'results': results,
