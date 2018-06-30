@@ -1,18 +1,20 @@
-import unittest
+# import unittest
 import json
-from api.views import app
+from api import app
+from flask_testing import TestCase
 
 
-class RideTestCase(unittest.TestCase):
+class RideTestCase(TestCase):
     def setUp(self):
         self.sample_data = {
-            'route': 'A to B',
-            'driver': 'Robert',
+            'route': 'Kampala',
+            'driver': '1',
             'fare': 5000
         }
 
+    def create_app(self):
         # initialize the test client
-        self.client = app.test_client()
+        return app
 
     def test_create_ride(self):
         res = self.client.post(
@@ -21,6 +23,7 @@ class RideTestCase(unittest.TestCase):
             content_type='application/json'
         )
         res_data = json.loads(res.data.decode())
+        print(res_data)
         # assert keys
         self.assertIn('status', res_data)
         self.assertIn('message', res_data)
@@ -80,8 +83,8 @@ class RideTestCase(unittest.TestCase):
 
     def test_join_a_ride(self):
         self.sample_data = {
-            'username': 'robert',
-            'contact': '0702-811121'
+            'passenger': '1',
+            'ride': '1'
         }
         res = self.client.post('/api/v1/rides/1/requests',
                                data=json.dumps(self.sample_data),
