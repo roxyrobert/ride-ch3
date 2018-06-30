@@ -1,21 +1,19 @@
 from flask import Flask, jsonify, request
-
-
-rides = []
+from api import cur, conn
 
 
 class Rides:
 
     def __init__(self, route, driver, fare):
-        rides = []
+
         '''rides class'''
-        self._id = 0
+        self.id = 0
         self.route = route
         self.driver = driver
         self.fare = fare
 
     def get_id(self):
-        return self._id
+        return self.id
 
     def get_route(self):
         return self.route
@@ -29,30 +27,38 @@ class Rides:
     def add_ride(self):
         '''create a new_ride'''
 
-        _id = len(rides)
-        self._id = _id + 1
+        cur.execute(
+            "INSERT INTO rides (route, driver, fare) VALUES ('{}','{}','{}')"
+            .format(self.route, self.driver, self.fare))
+        conn.commit()
 
+        cur.execute(
+            "SELECT id FROM rides WHERE driver = '{}' ORDER BY created_at DESC"
+            .format(self.driver))
+        record = cur.fetchone()
+        self.id = record[0]
         new_ride = {
-            '_id': self._id,
+            'id': self.id,
             'route': self.route,
             'driver': self.driver,
             'fare': self.fare
         }
 
-        rides.append(new_ride)
         return new_ride
 
     @staticmethod
-    def get_a_specific_ride(_id):
-
-        _id = int(_id)
-        if _id > 0 and _id <= len(rides):                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            
+    def get_a_specific_ride(id):
+        """fetch a ride by id"""
+        cur.execute(
+            "SELECT * FROM rides WHERE id = '{}'".format(id))
+        record = cur.fetchone()
+        if len(record) > 0:
             ride_data = {
-                '_id': rides[_id-1]['_id'],
-                'route': rides[_id-1]['route'],
-                'driver': rides[_id-1]['driver'],
-                'fare': rides[_id-1]['fare'],
-            }
+                    '_id': record[0],
+                    'route': record[1],
+                    'driver': record[2],
+                    'fare': record[3],
+                }
             return ride_data
         else:
             return jsonify({
@@ -60,36 +66,49 @@ class Rides:
                 'response_message': 'Ride ID not found',
             }), 404
 
-
-ride_requests = []
+    @staticmethod
+    def get_all_rides():
+        """fetch all rides"""
+        cur.execute(
+            "SELECT * FROM rides")
+        record = cur.fetchall()
+        if len(record) > 0:
+            return record
 
 
 class RideRequests:
-    def __init__(self, username, contact):
-        self.request_id = 0
-        self.username = username
-        self.contact = contact
+    def __init__(self, passenger, ride):
+        self.id = 0
+        self.passenger = passenger
+        self.ride = ride
 
     def get_request_id(self):
-        return self.request_id
+        return self.id
 
-    def get_username(self):
-        return self.username
+    def get_passenger(self):
+        return self.passenger
 
     def get_contact(self):
-        return self.contact
+        return self.ride
 
     def join_ride(self):
         '''request to join a ride'''
+        cur.execute(
+            "INSERT INTO requests (passenger, ride) VALUES ('{}','{}');"
+            .format(self.passenger, self.ride))
+        conn.commit()
+        print("here")
 
-        request_id = len(ride_requests)
-        self.request_id = request_id + 1
+        cur.execute(
+            "SELECT * FROM requests WHERE passenger = '{}' ORDER BY created_at DESC;".format(self.passenger))
+        record = cur.fetchone()
 
-        request_ride = {
-            'request_id': self.request_id,
-            'username': self.username,
-            'contact': self.contact
-        }
-
-        ride_requests.append(request_ride)
-        return request_ride
+        self.id = record[0]
+        if len(record) > 0:
+            self.id = record[0]
+            ride_request = {
+                    '_id': self.id,
+                    'passenger': record[1],
+                    'ride': record[2]
+                }
+            return ride_request
