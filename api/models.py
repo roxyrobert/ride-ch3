@@ -2,6 +2,77 @@ from flask import Flask, jsonify, request
 from api import cur, conn
 
 
+class Users:
+
+    def __init__(self, username, email, password, contact):
+        '''users class'''
+        self.id = 0
+        self.username = username
+        self.email = email
+        self.password = password
+        self.contact = contact
+
+    def get_id(self):
+        return self.id
+
+    def get_username(self):
+        return self.username
+
+    def get_email(self):
+        return self.email
+
+    def get_password(self):
+        return self.password
+
+    def get_contact(self):
+        return self.contact
+
+    def create_user(self):
+        '''create new user'''
+
+        cur.execute(
+            "INSERT INTO users (username, email, password, contact) VALUES ('{}','{}','{}','{}')"
+            .format(self.username, self.email, self.password, self.contact))
+        conn.commit()
+
+        cur.execute(
+            "SELECT id FROM users WHERE username = '{}' ORDER BY id ASC"
+            .format(self.username))
+        record = cur.fetchone()
+        self.id = record[0]
+        new_user = {
+            'id': self.id,
+            'username': self.username,
+            'email': self.email,
+            'password': self.password,
+            'contact': self.contact
+        }
+
+        return new_user
+
+    @staticmethod
+    def get_all_users():
+        """fetch all users"""
+        cur.execute(
+            "SELECT * FROM users")
+        records = cur.fetchall()
+        if len(records) > 0:
+            users_list = []
+            for record in records:
+                user = {
+                    'id': record[0],
+                    'username': record[1],
+                    'email': record[2],
+                    'password': record[3],
+                    'contact': record[4]
+                }
+                users_list.append(user)
+            return users_list
+    
+
+
+
+
 class Rides:
 
     def __init__(self, route, driver, fare):
