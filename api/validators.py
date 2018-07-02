@@ -1,6 +1,17 @@
 from jsonschema import validate
 
-schema = {
+users_schema = {
+    "type": "object",
+    "properties": {
+        "username": {"type": "string"},
+        "email": {"type": "string", "format": "email"},
+        "password": {"type": "string"},
+        "contact": {"type": "string", "pattern": "^[0-9]{4}-[0-9]{6}"}
+    },
+    "required": ["username", "email", "password", "contact"]
+}
+
+create_ride_schema = {
     "type": "object",
     "properties": {
         "route": {"type": "string"},
