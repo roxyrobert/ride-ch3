@@ -1,8 +1,48 @@
 from flask import Flask, jsonify, request
-from .models import Rides, RideRequests
-from .validators import schema, join_ride_schema
+from .models import Rides, RideRequests, Users
+from .validators import create_ride_schema, join_ride_schema, users_schema
 from jsonschema import validate
+from api import cur, conn
 from api import app
+
+
+@app.route('/auth/signup', methods=['POST'])
+# This endpoints creates a new user in the database
+def signup():
+    user_data = request.get_json()
+    cur.execute(
+            "SELECT email FROM users WHERE email='{}'".format(user_data['email']))
+    record = cur.fetchone()
+    if record is None:
+        try:
+
+            validate({'username': user_data['username'],
+                     'email': user_data['email'],
+                      'password': user_data['password'],
+                      'contact': user_data['contact']}, users_schema)
+
+            new_user = Users(user_data['username'], user_data['email'],
+                            user_data['password'], user_data['contact'])
+
+            new_user.create_user()
+
+            return jsonify({
+                    'status': 'OK',
+                    'message': 'New user successfully created',
+                    'username': new_user.get_username(),
+                    'id': new_user.get_id()
+                }), 201
+        except:
+            return jsonify({
+                'status': 'FAIL',
+                'message': 'Failed to create user. Invalid user data entered',
+                }), 400
+    else:
+        return jsonify({
+                'status': 'FAIL',
+                'message': 'user already exists'
+        })
+
 
 
 @app.route('/api/v1/rides', methods=['POST'])
@@ -12,7 +52,7 @@ def create_ride():
     try:
         validate({'route': ride_data['route'],
                  'driver': ride_data['driver'],
-                  'fare': ride_data['fare']}, schema)
+                  'fare': ride_data['fare']}, create_ride_schema)
 
         new_ride = Rides(ride_data['route'], ride_data['driver'],
                          ride_data['fare'])
