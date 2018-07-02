@@ -98,3 +98,45 @@ class RideTestCase(TestCase):
         self.assertIn('message', res_data)
         self.assertIn('request_id', res_data)
         self.assertIn('ride_id', res_data)
+    
+    def test_signup(self):
+        self.sample_data = {
+            'username':'Inno',
+	        'email': 'Inno@gmail.com',
+	        'password':'12345',
+	        'contact':'0702-811121'
+        }
+        res = self.client.post('/auth/signup',
+                               data=json.dumps(self.sample_data),
+                               content_type='application/json')
+        res_data = json.loads(res.data.decode())
+        self.assertEqual(res_data['status'], 'OK')
+        # assert expected status code
+        self.assertEqual(res.status_code, 201)
+        # assert keys
+        self.assertIn('status', res_data)
+        self.assertIn('message', res_data)
+        self.assertIn('username', res_data)
+        self.assertIn('id', res_data)
+    
+    def test_signup_with_invalid_data(self):
+        self.sample_data = {
+            'username':'tester',
+	        'email': 'tester.com',
+	        'password':'12345',
+	        'contact':'0702811121'
+        }
+        res = self.client.post(
+            '/auth/signup',
+            data=json.dumps(self.sample_data),
+            content_type='application/json'
+        )
+        res_data = json.loads(res.data.decode())
+        # assert keys
+        self.assertIn('status', res_data)
+        self.assertIn('message', res_data)
+        # assert expected data
+        self.assertEqual(res_data['status'], 'fail')
+        # assert expected status code
+        self.assertEqual(res.status_code, 400)
+        self.assertNotEqual(res.status_code, 201)
