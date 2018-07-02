@@ -34,12 +34,12 @@ def signup():
                 }), 201
         except:
             return jsonify({
-                'status': 'FAIL',
-                'message': 'Failed to create user. Invalid user data entered',
+                'status': 'fail',
+                'message': 'failed to create user. Invalid user data entered',
                 }), 400
     else:
         return jsonify({
-                'status': 'FAIL',
+                'status': 'fail',
                 'message': 'user already exists'
         })
 
@@ -65,8 +65,8 @@ def create_ride():
 
     except:
         return jsonify({
-            'status': 'FAIL',
-            'message': 'Failed to create Ride. Invalid ride data',
+            'status': 'fail',
+            'message': 'failed to create Ride. Invalid ride data',
             }), 400
 
 
@@ -105,7 +105,7 @@ def get_a_specific_ride(_id):
     except:
         return jsonify({
             'response_message': 'Ride does not exist',
-            'status': 'FAIL'
+            'status': 'fail'
         }), 404
 
 
