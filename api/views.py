@@ -53,6 +53,7 @@ def signin():
     cur.execute(
         "SELECT * FROM users WHERE email='{}'".format(login_data['email']))
     user = cur.fetchone()
+
     if len(user) > 0:
 
         user_object = Users(user[1], user[2], user[3], user[4])
@@ -99,20 +100,27 @@ def create_ride():
 # This endpoint gets all rides
 def get_all_rides():
     results = Rides.get_all_rides()
-    rides_list = []
-    for result in results:
-        ride = {
-            'id': result[0],
-            'route': result[1],
-            'driver': result[2],
-            'fare': result[3],
-            'created_at': result[4]
-        }
-        rides_list.append(ride)
-    return jsonify({
-        'status': 'OK',
-        'rides': rides_list
-    }), 200
+    if len(results) > 0:
+        rides_list = []
+        for result in results:
+            ride = {
+                'id': result[0],
+                'route': result[1],
+                'driver': result[2],
+                'fare': result[3],
+                'created_at': result[4]
+            }
+            rides_list.append(ride)
+        return jsonify({
+            'status': 'OK',
+            'rides': rides_list
+        }), 200
+    else:
+        return jsonify({
+            'status': 'not found',
+            'message': 'There are no ride offers'
+        }), 404
+
 
 
 @app.route('/api/v1/rides/<_id>', methods=['GET'])
@@ -147,3 +155,26 @@ def join_a_ride(_id):
         'request_id': request_ride.get_request_id(),
         'ride_id': _id
     }), 201
+
+@app.route('/api/v1/users/rides/<ride_Id>/requests', methods=['GET'])
+def get_requests_by_id(ride_Id):
+    results = RideRequests.get_requests_for_ride(ride_Id)
+    if len(results) > 0:
+        requests_list = []
+        for result in results:
+            ride_request = {
+                'id': result[0],
+                'passenger': result[1],
+                'ride': result[2]
+            }
+            requests_list.append(ride_request)
+        return jsonify({
+            'status': 'OK',
+            'message': 'Ride requests returned',
+            'ride_requests': requests_list
+        }), 200
+    else:
+        return jsonify({
+            'status': 'not found',
+            'message': 'There are no requests to the offer'
+        }), 404
