@@ -110,7 +110,7 @@ class Rides:
         return self.fare
 
     def add_ride(self):
-        '''create a new_ride'''
+        '''create a new_ride offer'''
 
         cur.execute(
             "INSERT INTO rides (route, driver, fare) VALUES ('{}','{}','{}')"
@@ -182,7 +182,6 @@ class RideRequests:
             "INSERT INTO requests (passenger, ride) VALUES ('{}','{}');"
             .format(self.passenger, self.ride))
         conn.commit()
-        print("here")
 
         cur.execute(
             "SELECT * FROM requests WHERE passenger = '{}' ORDER BY created_at DESC;".format(self.passenger))
@@ -197,3 +196,15 @@ class RideRequests:
                     'ride': record[2]
                 }
             return ride_request
+    
+    @staticmethod
+    def get_requests_for_ride(id):
+        '''get all ride requests to a specific ride offer'''
+        cur.execute(
+            "SELECT * FROM requests WHERE ride = '{}'".format(id))
+        ride_requests = cur.fetchall()
+        if len(ride_requests) > 0:
+            return ride_requests
+
+        
+    
