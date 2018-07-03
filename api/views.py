@@ -1,6 +1,6 @@
 from flask import Flask, jsonify, request
 from .models import Rides, RideRequests, Users
-from .validators import create_ride_schema, join_ride_schema, users_schema
+from .validators import create_ride_schema, join_ride_schema, users_schema, login_schema
 from jsonschema import validate
 from api import cur, conn
 from api import app
@@ -43,6 +43,31 @@ def signup():
                 'message': 'user already exists'
         })
 
+@app.route('/auth/login', methods=['POST'])
+def signin():
+    login_data = request.get_json()
+    
+    validate({'email': login_data['email'],
+        'password': login_data['password']}, login_schema)
+    # Get user by email
+    cur.execute(
+        "SELECT * FROM users WHERE email='{}'".format(login_data['email']))
+    user = cur.fetchone()
+    if len(user) > 0:
+
+        user_object = Users(user[1], user[2], user[3], user[4])
+        
+        user_token = user_object.get_token()
+        return jsonify({
+            'status': 'OK',
+            'message': 'logged in succesfully',
+            'access_token': user_token.decode('utf8')
+            }), 200
+    else:
+        return jsonify({
+            'status':'fail',
+            'message':'invalid login data'
+        }), 400
 
 
 @app.route('/api/v1/rides', methods=['POST'])
