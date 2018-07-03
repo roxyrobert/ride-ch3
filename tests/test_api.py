@@ -49,7 +49,7 @@ class RideTestCase(TestCase):
         self.assertIn('status', res_data)
         self.assertIn('message', res_data)
         # assert expected data
-        self.assertEqual(res_data['status'], 'FAIL')
+        self.assertEqual(res_data['status'], 'fail')
         # assert expected status code
         self.assertEqual(res.status_code, 400)
         self.assertNotEqual(res.status_code, 201)
@@ -140,3 +140,32 @@ class RideTestCase(TestCase):
         # assert expected status code
         self.assertEqual(res.status_code, 400)
         self.assertNotEqual(res.status_code, 201)
+    
+    def test_login(self):
+        self.sample_data = {
+            'username':'tester',
+	        'email': 'tester@mail.com',
+	        'password':'12345',
+	        'contact':'0702-811121'
+        }
+        signup_data = self.client.post('/auth/signup',
+                               data=json.dumps(self.sample_data),
+                               content_type='application/json')
+        response_data = json.loads(signup_data.data.decode())
+        self.sample_data = {
+	        'email': 'tester@mail.com',
+	        'password':'12345'
+        }
+        # pick client data and decode it
+        res = self.client.post('/auth/login',
+                               data=json.dumps(self.sample_data),
+                               content_type='application/json')
+        res_data = json.loads(res.data.decode())
+        # assert expected status
+        self.assertEqual(res_data['status'], 'OK')
+        # assert expected status code
+        self.assertEqual(res.status_code, 200)
+        # assert keys
+        self.assertIn('status', res_data)
+        self.assertIn('message', res_data)
+        self.assertIn('access_token', res_data)
