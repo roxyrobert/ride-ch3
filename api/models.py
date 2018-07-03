@@ -1,3 +1,4 @@
+import jwt
 from flask import Flask, jsonify, request
 from api import cur, conn
 
@@ -49,6 +50,19 @@ class Users:
         }
 
         return new_user
+    
+    
+    def get_token(self):
+        token = jwt.encode({'email': self.email}, 'secret', algorithm='HS256')
+        return token
+    
+    
+    def decode_token(self, token):
+        user = jwt.decode(token, 'secret', algorithms=['HS256'])
+        if user['email'] == self.email:
+            return True
+        return False
+        
 
     @staticmethod
     def get_all_users():
