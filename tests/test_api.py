@@ -172,7 +172,7 @@ class RideTestCase(TestCase):
         self.assertIn('access_token', res_data)
     
     # Test login with invalid login data
-    def test_login(self):
+    def test_login_with_invalid_data(self):
         self.sample_data = {
             'username':'tester',
             'email': 'tester@mail.com',
