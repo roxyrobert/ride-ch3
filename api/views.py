@@ -9,6 +9,7 @@ from api import app
 @app.route('/auth/signup', methods=['POST'])
 # This endpoints creates a new user in the database
 def signup():
+    '''This endpoint create a new user account'''
     user_data = request.get_json()
     cur.execute(
             "SELECT email FROM users WHERE email='{}'".format(user_data['email']))
@@ -45,6 +46,7 @@ def signup():
 
 @app.route('/auth/login', methods=['POST'])
 def signin():
+    '''This endpoint enables a user to login'''
     login_data = request.get_json()
     try:
         validate({'email': login_data['email'],
@@ -74,7 +76,7 @@ def signin():
 
 
 @app.route('/api/v1/rides', methods=['POST'])
-# This endpoint creates a new ride and appends it to the rides list
+'''This endpoint creates a new ride and commits it to the database'''
 def create_ride():
     ride_data = request.get_json()
     try:
@@ -99,7 +101,7 @@ def create_ride():
 
 
 @app.route('/api/v1/rides', methods=['GET'])
-# This endpoint gets all rides
+'''This endpoint gets all rides'''
 def get_all_rides():
     results = Rides.get_all_rides()
     if len(results) > 0:
@@ -126,7 +128,7 @@ def get_all_rides():
 
 
 @app.route('/api/v1/rides/<_id>', methods=['GET'])
-# This endpoint gets a specific ride by id
+'''This endpoint gets a specific ride by id'''
 def get_a_specific_ride(_id):
 
     results = Rides.get_a_specific_ride(_id)  # to get a ride by id
@@ -146,6 +148,7 @@ def get_a_specific_ride(_id):
 
 @app.route('/api/v1/rides/<_id>/requests', methods=['POST'])
 def join_a_ride(_id):
+    '''This endpoint enables a user to make a request to join a ride offer'''
 
     request_data = request.get_json()
     request_ride = RideRequests(request_data['passenger'],
@@ -160,6 +163,7 @@ def join_a_ride(_id):
 
 @app.route('/api/v1/users/rides/<ride_Id>/requests', methods=['GET'])
 def get_requests_by_id(ride_Id):
+    ''' This endpoint returns all requests to a specific ride_offer'''
     results = RideRequests.get_requests_for_ride(ride_Id)
     if len(results) > 0:
         requests_list = []
@@ -183,6 +187,7 @@ def get_requests_by_id(ride_Id):
 
 @app.route('/users/rides/<ride_id>/requests/<request_id>', methods=['PUT'])
 def accept_or_reject(ride_id, request_id):
+    '''This endpoint enables a user to accept or reject a ride_request'''
     status = request.get_json().get('status', False)
 
     cur.execute(
@@ -192,11 +197,3 @@ def accept_or_reject(ride_id, request_id):
         'message': 'Ride_request rejected',
         'status':'ok'
     })
-    # except:
-    #     return jsonify({
-    #         'message': 'Ride_request pending',
-    #         'status':'ok'
-    #     })
-
-
-
