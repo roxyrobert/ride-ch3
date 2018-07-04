@@ -2,7 +2,8 @@ from flask import Flask, jsonify, request
 from .models import Rides, RideRequests, Users
 from .validators import create_ride_schema, join_ride_schema, users_schema, login_schema
 from jsonschema import validate
-from api import cur, conn
+from jsonschema.exceptions import ValidationError
+from api import cursor, connection
 from api import app
 
 
@@ -11,68 +12,70 @@ from api import app
 def signup():
     '''This endpoint create a new user account'''
     user_data = request.get_json()
-    cur.execute(
+    try:
+        validate(
+        {
+            'username': user_data['username'],
+            'email': user_data['email'],
+            'password': user_data['password'],
+            'contact': user_data['contact']
+        }, 
+         users_schema
+    )
+    except ValidationError:
+        return jsonify({'message': 'invalid input data'})
+     
+    return jsonify({'message': 'valid'})
+
+    cursor.execute(
             "SELECT email FROM users WHERE email='{}'".format(user_data['email']))
-    record = cur.fetchone()
-    if record is None:
-        try:
-
-            validate({'username': user_data['username'],
-                     'email': user_data['email'],
-                      'password': user_data['password'],
-                      'contact': user_data['contact']}, users_schema)
-
-            new_user = Users(user_data['username'], user_data['email'],
-                            user_data['password'], user_data['contact'])
-
-            new_user.create_user()
-
-            return jsonify({
+    records = cursor.fetchone()
+    if records[0]:
+        new_user = Users(user_data['username'], user_data['email'],
+                         user_data['password'], user_data['contact'])
+        new_user.create_user()
+        return jsonify({
                     'status': 'OK',
                     'message': 'New user successfully created',
                     'username': new_user.get_username(),
                     'id': new_user.get_id()
                 }), 201
-        except:
-            return jsonify({
-                'status': 'fail',
-                'message': 'failed to create user. Invalid user data entered',
-                }), 400
     else:
         return jsonify({
                 'status': 'fail',
                 'message': 'user already exists'
         })
 
+
 @app.route('/auth/login', methods=['POST'])
 def signin():
-    '''This endpoint enables a user to login'''
+    # This endpoint enables a user to login
     login_data = request.get_json()
+
     try:
         validate({'email': login_data['email'],
-            'password': login_data['password']}, login_schema)
-    except:
-        return jsonify({
-            'status':'fail',
-            'message':'invalid login data'
-        }), 400
-            
-    # Get user by email
-    cur.execute(
-        "SELECT * FROM users WHERE email='{}'".format(login_data['email']))
-    user = cur.fetchone()
+                  'password': login_data['password']}, login_schema)
+    except ValidationError:
+        return jsonify({'message': 'invalid input data'})
 
-    if len(user) > 0:
+    cursor.execute(
+        "SELECT * FROM users WHERE email='{}'".format(login_data['email']))
+    user = cursor.fetchone()
+
+    if user:
 
         user_object = Users(user[1], user[2], user[3], user[4])
-        
+
         user_token = user_object.get_token()
         return jsonify({
             'status': 'OK',
             'message': 'logged in succesfully',
             'access_token': user_token.decode('utf8')
             }), 200
-    
+    else:
+        return jsonify({
+            'message': 'user not found'
+        })
 
 
 @app.route('/api/v1/rides', methods=['POST'])
@@ -83,25 +86,21 @@ def create_ride():
         validate({'route': ride_data['route'],
                  'driver': ride_data['driver'],
                   'fare': ride_data['fare']}, create_ride_schema)
+    except ValidationError:
+        return jsonify({'message': 'invalid input data'})
 
-        new_ride = Rides(ride_data['route'], ride_data['driver'],
-                         ride_data['fare'])
-        new_ride.add_ride()
-        return jsonify({
-                'status': 'OK',
-                'message': 'Ride successfully created',
-                '_id': new_ride.get_id()
-            }), 201
+    new_ride = Rides(ride_data['route'], ride_data['driver'],
+                     ride_data['fare'])
+    new_ride.add_ride()
+    return jsonify({
+            'status': 'OK',
+            'message': 'Ride successfully created',
+            '_id': new_ride.get_id()
+        }), 201
 
-    except:
-        return jsonify({
-            'status': 'fail',
-            'message': 'failed to create Ride. Invalid ride data',
-            }), 400
 
 
 @app.route('/api/v1/rides', methods=['GET'])
-# This endpoint gets all rides
 def get_all_rides():
     results = Rides.get_all_rides()
     if len(results) > 0:
@@ -128,10 +127,9 @@ def get_all_rides():
 
 
 @app.route('/api/v1/rides/<_id>', methods=['GET'])
-# This endpoint gets a specific ride by id
-def get_a_specific_ride(_id):
+def get_specific_ride(_id):
 
-    results = Rides.get_a_specific_ride(_id)  # to get a ride by id
+    results = Rides.get_specific_ride(_id)
 
     try:
         return jsonify({
@@ -151,8 +149,14 @@ def join_a_ride(_id):
     # This endpoint enables a user to make a request to join a ride offer
 
     request_data = request.get_json()
+    try:
+        validate({'passenger': request_data['passenger'],
+                  'ride': request_data['ride']}, join_ride_schema)
+    except ValidationError:
+        return jsonify({'message': 'invalid input data'})
+
     request_ride = RideRequests(request_data['passenger'],
-                                    request_data['ride'])
+                                request_data['ride'])
     request_ride.join_ride()
     return jsonify({
         'status': 'OK',
@@ -187,16 +191,23 @@ def get_requests_by_id(ride_Id):
 
 @app.route('/users/rides/<ride_id>/requests/<request_id>', methods=['PUT'])
 def accept_or_reject(ride_id, request_id):
-    # This endpoint enables a user to accept or reject a ride_request
+
     status = request.get_json().get('status', False)
-    if status:
-        message = 'Ride request Accepted'
+    if type(status) == bool:
+
+        if status:
+            message = 'Ride request Accepted'
+        else:
+            message = 'Ride request Rejected'
+        cursor.execute(
+            "UPDATE requests SET status={} WHERE id ='{}'"
+            .format(status, request_id))
+        connection.commit()
+        return jsonify({
+            'message': message,
+            'status':'ok'
+        })
     else:
-        message = 'Ride request Rejected'
-    cur.execute(
-        "UPDATE requests SET status={} WHERE id ='{}'".format(status, request_id))
-    conn.commit()
-    return jsonify({
-        'message': message,
-        'status':'ok'
-    })
+        return jsonify({
+            'message': 'Invalid input data'
+        })
