@@ -162,7 +162,7 @@ class Rides:
 
 
 class RideRequests:
-    def __init__(self, passenger, ride):
+    def __init__(self, passenger=None, ride=None):
         self.id = 0
         self.passenger = passenger
         self.ride = ride
@@ -205,6 +205,8 @@ class RideRequests:
         ride_requests = cur.fetchall()
         if len(ride_requests) > 0:
             return ride_requests
+
+
 
         
     
