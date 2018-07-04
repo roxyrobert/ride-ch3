@@ -46,9 +46,15 @@ def signup():
 @app.route('/auth/login', methods=['POST'])
 def signin():
     login_data = request.get_json()
-    
-    validate({'email': login_data['email'],
-        'password': login_data['password']}, login_schema)
+    try:
+        validate({'email': login_data['email'],
+            'password': login_data['password']}, login_schema)
+    except:
+        return jsonify({
+            'status':'fail',
+            'message':'invalid login data'
+        }), 400
+            
     # Get user by email
     cur.execute(
         "SELECT * FROM users WHERE email='{}'".format(login_data['email']))
@@ -64,11 +70,7 @@ def signin():
             'message': 'logged in succesfully',
             'access_token': user_token.decode('utf8')
             }), 200
-    else:
-        return jsonify({
-            'status':'fail',
-            'message':'invalid login data'
-        }), 400
+    
 
 
 @app.route('/api/v1/rides', methods=['POST'])
@@ -178,3 +180,23 @@ def get_requests_by_id(ride_Id):
             'status': 'not found',
             'message': 'There are no requests to the offer'
         }), 404
+
+@app.route('/users/rides/<ride_id>/requests/<request_id>', methods=['PUT'])
+def accept_or_reject(ride_id, request_id):
+    status = request.get_json().get('status', False)
+
+    cur.execute(
+        "UPDATE requests SET status={} WHERE id ='{}'".format(status, request_id))
+    conn.commit()
+    return jsonify({
+        'message': 'Ride_request rejected',
+        'status':'ok'
+    })
+    # except:
+    #     return jsonify({
+    #         'message': 'Ride_request pending',
+    #         'status':'ok'
+    #     })
+
+
+
