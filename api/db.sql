@@ -18,5 +18,6 @@ CREATE TABLE requests(
    id SERIAL PRIMARY KEY,
    passenger INT references users(id),
    ride INT references rides(id),
+   status BOOLEAN NOT NULL DEFAULT FALSE,
    created_at TIMESTAMP default CURRENT_TIMESTAMP
 );
