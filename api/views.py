@@ -76,8 +76,8 @@ def signin():
 
 
 @app.route('/api/v1/rides', methods=['POST'])
-'''This endpoint creates a new ride and commits it to the database'''
 def create_ride():
+    """This endpoint creates a new ride and commits it to the database"""
     ride_data = request.get_json()
     try:
         validate({'route': ride_data['route'],
@@ -101,7 +101,7 @@ def create_ride():
 
 
 @app.route('/api/v1/rides', methods=['GET'])
-'''This endpoint gets all rides'''
+# This endpoint gets all rides
 def get_all_rides():
     results = Rides.get_all_rides()
     if len(results) > 0:
@@ -128,7 +128,7 @@ def get_all_rides():
 
 
 @app.route('/api/v1/rides/<_id>', methods=['GET'])
-'''This endpoint gets a specific ride by id'''
+# This endpoint gets a specific ride by id
 def get_a_specific_ride(_id):
 
     results = Rides.get_a_specific_ride(_id)  # to get a ride by id
@@ -148,7 +148,7 @@ def get_a_specific_ride(_id):
 
 @app.route('/api/v1/rides/<_id>/requests', methods=['POST'])
 def join_a_ride(_id):
-    '''This endpoint enables a user to make a request to join a ride offer'''
+    # This endpoint enables a user to make a request to join a ride offer
 
     request_data = request.get_json()
     request_ride = RideRequests(request_data['passenger'],
@@ -187,13 +187,16 @@ def get_requests_by_id(ride_Id):
 
 @app.route('/users/rides/<ride_id>/requests/<request_id>', methods=['PUT'])
 def accept_or_reject(ride_id, request_id):
-    '''This endpoint enables a user to accept or reject a ride_request'''
+    # This endpoint enables a user to accept or reject a ride_request
     status = request.get_json().get('status', False)
-
+    if status:
+        message = 'Ride request Accepted'
+    else:
+        message = 'Ride request Rejected'
     cur.execute(
         "UPDATE requests SET status={} WHERE id ='{}'".format(status, request_id))
     conn.commit()
     return jsonify({
-        'message': 'Ride_request rejected',
+        'message': message,
         'status':'ok'
     })
