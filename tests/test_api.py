@@ -32,7 +32,7 @@ class RideTestCase(TestCase):
             'password': '12345678',
             'contact': '0702-811121'
         }
-        self.client.post('/auth/signup',
+        self.client.post('/api/v1/auth/signup',
                          data=json.dumps(self.sample_data),
                          content_type='application/json')
 
@@ -60,7 +60,7 @@ class RideTestCase(TestCase):
             'password': '12345678',
             'contact': '0702-811121'
         }
-        self.client.post('/auth/signup',
+        self.client.post('/api/v1/auth/signup',
                          data=json.dumps(self.sample_data),
                          content_type='application/json')
         self.sample_data = {
@@ -87,7 +87,7 @@ class RideTestCase(TestCase):
             'password': '12345678',
             'contact': '0702-811121'
         }
-        self.client.post('/auth/signup',
+        self.client.post('/api/v1/auth/signup',
                          data=json.dumps(self.sample_data),
                          content_type='application/json')
         self.sample_data = {
@@ -121,7 +121,7 @@ class RideTestCase(TestCase):
             'password': '12345678',
             'contact': '0702-811121'
         }
-        self.client.post('/auth/signup',
+        self.client.post('/api/v1/auth/signup',
                          data=json.dumps(self.sample_data),
                          content_type='application/json')
         self.sample_data = {
@@ -153,7 +153,7 @@ class RideTestCase(TestCase):
             'password': '12345678',
             'contact': '0702-811121'
         }
-        self.client.post('/auth/signup',
+        self.client.post('/api/v1/auth/signup',
                          data=json.dumps(self.sample_data),
                          content_type='application/json')
         self.sample_data = {
@@ -190,12 +190,12 @@ class RideTestCase(TestCase):
             'password': '12345678',
             'contact': '0702-811121'
         }
-        res = self.client.post('/auth/signup',
+        res = self.client.post('/api/v1/auth/signup',
                                data=json.dumps(self.sample_data),
                                content_type='application/json')
         res_data = json.loads(res.data.decode())
         self.assertEqual(res_data['status'], 'OK')
-        
+
         self.assertEqual(res.status_code, 201)
         self.assertIn('status', res_data)
         self.assertIn('message', res_data)
@@ -210,7 +210,7 @@ class RideTestCase(TestCase):
             'contact': '0702811121'
         }
         res = self.client.post(
-            '/auth/signup',
+            '/api/v1/auth/signup',
             data=json.dumps(self.sample_data),
             content_type='application/json'
         )
@@ -229,14 +229,14 @@ class RideTestCase(TestCase):
             'password': '12345678',
             'contact': '0702-811121'
         }
-        self.client.post('/auth/signup',
+        self.client.post('/api/v1/auth/signup',
                          data=json.dumps(self.sample_data),
                          content_type='application/json')
         self.sample_data = {
             'email': 'tester@mail.com',
             'password': '12345678'
         }
-        res = self.client.post('/auth/login',
+        res = self.client.post('/api/v1/auth/login',
                                data=json.dumps(self.sample_data),
                                content_type='application/json')
         res_data = json.loads(res.data.decode())
@@ -253,14 +253,14 @@ class RideTestCase(TestCase):
             'password': '12345678',
             'contact': '0702-811121'
         }
-        self.client.post('/auth/signup',
+        self.client.post('/api/v1/auth/signup',
                          data=json.dumps(self.sample_data),
                          content_type='application/json')
         self.sample_data = {
             'email': 'te.com',
             'password': '12'
         }
-        res = self.client.post('/auth/login',
+        res = self.client.post('/api/v1/auth/login',
                                data=json.dumps(self.sample_data),
                                content_type='application/json')
         res_data = json.loads(res.data.decode())
@@ -276,7 +276,7 @@ class RideTestCase(TestCase):
             'password': '12345678',
             'contact': '0702-811121'
         }
-        self.client.post('/auth/signup',
+        self.client.post('/api/v1/auth/signup',
                          data=json.dumps(self.sample_data),
                          content_type='application/json')
         self.sample_data = {
@@ -303,4 +303,3 @@ class RideTestCase(TestCase):
         self.assertIn('status', res_data)
         self.assertIn('message', res_data)
         self.assertIn('ride_requests', res_data)
-        
