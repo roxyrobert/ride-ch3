@@ -33,7 +33,7 @@ def decode_token(self, token):
         return False
 
 
-@app.route('/auth/signup', methods=['POST'])
+@app.route('/api/v1/auth/signup', methods=['POST'])
 # This endpoints creates a new user in the database
 def signup():
     '''This endpoint create a new user account'''
@@ -76,7 +76,7 @@ def signup():
         })
 
 
-@app.route('/auth/login', methods=['POST'])
+@app.route('/api/v1/auth/login', methods=['POST'])
 def signin():
     # This endpoint enables a user to login
     connect = DBConnection()
@@ -222,7 +222,8 @@ def get_requests_by_id(ride_Id):
         }), 404
 
 
-@app.route('/users/rides/<ride_id>/requests/<request_id>', methods=['PUT'])
+@app.route('/api/v1/users/rides/<ride_id>/requests/<request_id>',
+           methods=['PUT'])
 def accept_or_reject(ride_id, request_id):
     connect = DBConnection()
     cursor = connect.cursor
