@@ -3,7 +3,8 @@ from .models import Rides, RideRequests, Users
 from .validators import create_ride_schema, join_ride_schema, users_schema, login_schema
 from jsonschema import validate
 from jsonschema.exceptions import ValidationError
-from api import cursor, connection
+# from api import cursor, connection
+from .db import DBConnection
 from api import app
 
 
@@ -11,6 +12,8 @@ from api import app
 # This endpoints creates a new user in the database
 def signup():
     '''This endpoint create a new user account'''
+    connect = DBConnection()
+    cursor = connect.cursor
     user_data = request.get_json()
     try:
         validate(
@@ -24,13 +27,12 @@ def signup():
     )
     except ValidationError:
         return jsonify({'message': 'invalid input data'})
-     
-    return jsonify({'message': 'valid'})
 
     cursor.execute(
-            "SELECT email FROM users WHERE email='{}'".format(user_data['email']))
+            """SELECT "email" FROM "users" WHERE "email"='{}'""".format(user_data['email']))
     records = cursor.fetchone()
-    if records[0]:
+
+    if not records:
         new_user = Users(user_data['username'], user_data['email'],
                          user_data['password'], user_data['contact'])
         new_user.create_user()
@@ -50,6 +52,8 @@ def signup():
 @app.route('/auth/login', methods=['POST'])
 def signin():
     # This endpoint enables a user to login
+    connect = DBConnection()
+    cursor = connect.cursor
     login_data = request.get_json()
 
     try:
@@ -87,7 +91,8 @@ def create_ride():
                  'driver': ride_data['driver'],
                   'fare': ride_data['fare']}, create_ride_schema)
     except ValidationError:
-        return jsonify({'message': 'invalid input data'})
+        return jsonify({'message': 'invalid input data',
+                        'status': 'fail'}), 400
 
     new_ride = Rides(ride_data['route'], ride_data['driver'],
                      ride_data['fare'])
@@ -191,8 +196,11 @@ def get_requests_by_id(ride_Id):
 
 @app.route('/users/rides/<ride_id>/requests/<request_id>', methods=['PUT'])
 def accept_or_reject(ride_id, request_id):
+    connect = DBConnection()
+    cursor = connect.cursor
 
     status = request.get_json().get('status', False)
+    print(status)
     if type(status) == bool:
 
         if status:
@@ -202,10 +210,9 @@ def accept_or_reject(ride_id, request_id):
         cursor.execute(
             "UPDATE requests SET status={} WHERE id ='{}'"
             .format(status, request_id))
-        connection.commit()
         return jsonify({
             'message': message,
-            'status':'ok'
+            'status': 'ok'
         })
     else:
         return jsonify({
