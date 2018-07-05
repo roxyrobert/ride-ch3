@@ -1,14 +1,39 @@
-from flask import Flask, jsonify, request
+from flask import jsonify, request
 from .models import Rides, RideRequests, Users
-from .validators import create_ride_schema, join_ride_schema, users_schema, login_schema
+from .validators import create_ride_schema, join_ride_schema
+from .validators import users_schema, login_schema
 from jsonschema import validate
 from jsonschema.exceptions import ValidationError
-# from api import cursor, connection
+from functools import wraps
 from .db import DBConnection
 from api import app
+import jwt
 
 
-@app.route('/auth/signup', methods=['POST'])
+def authenticate(f):
+        @wraps(f)
+        def wrapper(*args, **kwargs):
+            auth = request.authorization
+            if not auth:
+                return jsonify({'message': 'Provide token'})
+            else:
+                try:
+                    jwt.decode(auth, 'secret', algorithms=['HS256'])
+                except Exception as e:
+                    print(e)
+                    return jsonify({'message': 'Invalid token'})
+            return f(*args, **kwargs)
+        return wrapper
+
+
+def decode_token(self, token):
+        user = jwt.decode(token, 'secret', algorithms=['HS256'])
+        if user['email'] == self.email:
+            return True
+        return False
+
+
+@app.route('/api/v1/auth/signup', methods=['POST'])
 # This endpoints creates a new user in the database
 def signup():
     '''This endpoint create a new user account'''
@@ -17,19 +42,21 @@ def signup():
     user_data = request.get_json()
     try:
         validate(
-        {
-            'username': user_data['username'],
-            'email': user_data['email'],
-            'password': user_data['password'],
-            'contact': user_data['contact']
-        }, 
-         users_schema
-    )
+            {
+                'username': user_data['username'],
+                'email': user_data['email'],
+                'password': user_data['password'],
+                'contact': user_data['contact']
+            },
+            users_schema
+            )
     except ValidationError:
-        return jsonify({'message': 'invalid input data'})
+        return jsonify({'message': 'Invalid input data',
+                        'status': 'fail'}), 400
 
     cursor.execute(
-            """SELECT "email" FROM "users" WHERE "email"='{}'""".format(user_data['email']))
+            """SELECT "email" FROM "users" WHERE "email"='{}'"""
+            .format(user_data['email']))
     records = cursor.fetchone()
 
     if not records:
@@ -49,7 +76,7 @@ def signup():
         })
 
 
-@app.route('/auth/login', methods=['POST'])
+@app.route('/api/v1/auth/login', methods=['POST'])
 def signin():
     # This endpoint enables a user to login
     connect = DBConnection()
@@ -60,7 +87,8 @@ def signin():
         validate({'email': login_data['email'],
                   'password': login_data['password']}, login_schema)
     except ValidationError:
-        return jsonify({'message': 'invalid input data'})
+        return jsonify({'message': 'invalid input data',
+                        'status': 'fail'}), 400
 
     cursor.execute(
         "SELECT * FROM users WHERE email='{}'".format(login_data['email']))
@@ -83,6 +111,7 @@ def signin():
 
 
 @app.route('/api/v1/rides', methods=['POST'])
+# @authenticate
 def create_ride():
     """This endpoint creates a new ride and commits it to the database"""
     ride_data = request.get_json()
@@ -104,11 +133,10 @@ def create_ride():
         }), 201
 
 
-
 @app.route('/api/v1/rides', methods=['GET'])
 def get_all_rides():
     results = Rides.get_all_rides()
-    if len(results) > 0:
+    if results:
         rides_list = []
         for result in results:
             ride = {
@@ -130,7 +158,6 @@ def get_all_rides():
         }), 404
 
 
-
 @app.route('/api/v1/rides/<_id>', methods=['GET'])
 def get_specific_ride(_id):
 
@@ -142,7 +169,7 @@ def get_specific_ride(_id):
             'status': 'OK',
             'response_message': 'Successfully returned Ride',
         }), 200
-    except:
+    except Exception as e:
         return jsonify({
             'response_message': 'Ride does not exist',
             'status': 'fail'
@@ -151,7 +178,6 @@ def get_specific_ride(_id):
 
 @app.route('/api/v1/rides/<_id>/requests', methods=['POST'])
 def join_a_ride(_id):
-    # This endpoint enables a user to make a request to join a ride offer
 
     request_data = request.get_json()
     try:
@@ -169,6 +195,7 @@ def join_a_ride(_id):
         'request_id': request_ride.get_request_id(),
         'ride_id': _id
     }), 201
+
 
 @app.route('/api/v1/users/rides/<ride_Id>/requests', methods=['GET'])
 def get_requests_by_id(ride_Id):
@@ -194,13 +221,15 @@ def get_requests_by_id(ride_Id):
             'message': 'There are no requests to the offer'
         }), 404
 
-@app.route('/users/rides/<ride_id>/requests/<request_id>', methods=['PUT'])
+
+@app.route('/api/v1/users/rides/<ride_id>/requests/<request_id>',
+           methods=['PUT'])
 def accept_or_reject(ride_id, request_id):
     connect = DBConnection()
     cursor = connect.cursor
 
     status = request.get_json().get('status', False)
-    print(status)
+
     if type(status) == bool:
 
         if status:
