@@ -1,6 +1,11 @@
 import jwt
-from flask import Flask, jsonify, request
-from api import cur, conn
+from flask import jsonify
+# from api import connection
+from .db import DBConnection
+
+db_connect = DBConnection()
+connect = db_connect.connection
+cursor = db_connect.connection.cursor()
 
 
 class Users:
@@ -30,16 +35,16 @@ class Users:
 
     def create_user(self):
         '''create new user'''
-
-        cur.execute(
-            "INSERT INTO users (username, email, password, contact) VALUES ('{}','{}','{}','{}')"
+        global cursor
+        cursor.execute(
+            """INSERT INTO users (username, email, password, contact) VALUES ('{}','{}','{}','{}')"""
             .format(self.username, self.email, self.password, self.contact))
-        conn.commit()
+        connect.commit()
 
-        cur.execute(
-            "SELECT id FROM users WHERE username = '{}' ORDER BY id ASC"
+        cursor.execute(
+            """SELECT id FROM users WHERE username = '{}' ORDER BY id ASC"""
             .format(self.username))
-        record = cur.fetchone()
+        record = cursor.fetchone()
         self.id = record[0]
         new_user = {
             'id': self.id,
@@ -50,26 +55,24 @@ class Users:
         }
 
         return new_user
-    
-    
+
     def get_token(self):
         token = jwt.encode({'email': self.email}, 'secret', algorithm='HS256')
         return token
-    
-    
+
     def decode_token(self, token):
         user = jwt.decode(token, 'secret', algorithms=['HS256'])
         if user['email'] == self.email:
             return True
         return False
-        
 
     @staticmethod
     def get_all_users():
         """fetch all users"""
-        cur.execute(
+        global cursor
+        cursor.execute(
             "SELECT * FROM users")
-        records = cur.fetchall()
+        records = cursor.fetchall()
         if len(records) > 0:
             users_list = []
             for record in records:
@@ -82,9 +85,6 @@ class Users:
                 }
                 users_list.append(user)
             return users_list
-    
-
-
 
 
 class Rides:
@@ -111,16 +111,16 @@ class Rides:
 
     def add_ride(self):
         '''create a new_ride offer'''
-
-        cur.execute(
-            "INSERT INTO rides (route, driver, fare) VALUES ('{}','{}','{}')"
+        global cursor
+        cursor.execute(
+            """INSERT INTO rides (route, driver, fare) VALUES ('{}','{}','{}')"""
             .format(self.route, self.driver, self.fare))
-        conn.commit()
+        connect.commit()
 
-        cur.execute(
-            "SELECT id FROM rides WHERE driver = '{}' ORDER BY created_at DESC"
+        cursor.execute(
+            """SELECT id FROM rides WHERE driver = '{}' ORDER BY created_at DESC"""
             .format(self.driver))
-        record = cur.fetchone()
+        record = cursor.fetchone()
         self.id = record[0]
         new_ride = {
             'id': self.id,
@@ -132,11 +132,12 @@ class Rides:
         return new_ride
 
     @staticmethod
-    def get_a_specific_ride(id):
+    def get_specific_ride(_id):
         """fetch a ride by id"""
-        cur.execute(
-            "SELECT * FROM rides WHERE id = '{}'".format(id))
-        record = cur.fetchone()
+        global cursor
+        cursor.execute(
+            """SELECT * FROM rides WHERE id = '{}'""".format(_id))
+        record = cursor.fetchone()
         if len(record) > 0:
             ride_data = {
                     '_id': record[0],
@@ -154,9 +155,10 @@ class Rides:
     @staticmethod
     def get_all_rides():
         """fetch all rides"""
-        cur.execute(
-            "SELECT * FROM rides")
-        record = cur.fetchall()
+        global cursor
+        cursor.execute(
+            """SELECT * FROM rides""")
+        record = cursor.fetchall()
         if len(record) > 0:
             return record
 
@@ -178,14 +180,15 @@ class RideRequests:
 
     def join_ride(self):
         '''request to join a ride'''
-        cur.execute(
-            "INSERT INTO requests (passenger, ride) VALUES ('{}','{}');"
+        global cursor
+        cursor.execute(
+            """INSERT INTO requests (passenger, ride) VALUES ('{}','{}');"""
             .format(self.passenger, self.ride))
-        conn.commit()
+        connect.commit()
 
-        cur.execute(
-            "SELECT * FROM requests WHERE passenger = '{}' ORDER BY created_at DESC;".format(self.passenger))
-        record = cur.fetchone()
+        cursor.execute(
+            """SELECT * FROM requests WHERE passenger = '{}' ORDER BY created_at DESC;""".format(self.passenger))
+        record = cursor.fetchone()
 
         self.id = record[0]
         if len(record) > 0:
@@ -200,13 +203,9 @@ class RideRequests:
     @staticmethod
     def get_requests_for_ride(id):
         '''get all ride requests to a specific ride offer'''
-        cur.execute(
-            "SELECT * FROM requests WHERE ride = '{}'".format(id))
-        ride_requests = cur.fetchall()
+        global cursor
+        cursor.execute(
+            """SELECT * FROM requests WHERE ride = '{}'""".format(id))
+        ride_requests = cursor.fetchall()
         if len(ride_requests) > 0:
             return ride_requests
-
-
-
-        
-    
