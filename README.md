@@ -8,10 +8,14 @@ and passengers to join available ride offers.
 
 ## Tools
 Tools used during the development of this API are;
+- [Postgres](https://www.postgresql.org/) - this is a database server
+- psycopg2 - this is the database adapter coonecting the app to the db.
+- jsonschema - this is the validation framework used to validate user inputs
+- pep8 is the linting framework used in developing this app
 - [JWT](https://jwt.io) - JSON Web Tokens are an open, industry standard RFC 7519 method for representing claims securely between two parties.
 - JWT.IO allows you to decode, verify and generate JWT.
 - [Flask](http://flask.pocoo.org/) - this is a python micro-framework
-- [Postgresql](https://www.postgresql.org/) - this is a database server
+
 
 
 ## Requirements
