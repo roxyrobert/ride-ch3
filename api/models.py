@@ -3,6 +3,7 @@ from flask import jsonify
 # from api import connection
 from .db import DBConnection
 
+
 db_connect = DBConnection()
 connect = db_connect.connection
 cursor = db_connect.connection.cursor()
@@ -37,7 +38,9 @@ class Users:
         '''create new user'''
         global cursor
         cursor.execute(
-            """INSERT INTO users (username, email, password, contact) VALUES ('{}','{}','{}','{}')"""
+            """INSERT INTO users
+            (username, email, password, contact)
+            VALUES ('{}','{}','{}','{}')"""
             .format(self.username, self.email, self.password, self.contact))
         connect.commit()
 
@@ -59,12 +62,6 @@ class Users:
     def get_token(self):
         token = jwt.encode({'email': self.email}, 'secret', algorithm='HS256')
         return token
-
-    def decode_token(self, token):
-        user = jwt.decode(token, 'secret', algorithms=['HS256'])
-        if user['email'] == self.email:
-            return True
-        return False
 
     @staticmethod
     def get_all_users():
@@ -113,12 +110,14 @@ class Rides:
         '''create a new_ride offer'''
         global cursor
         cursor.execute(
-            """INSERT INTO rides (route, driver, fare) VALUES ('{}','{}','{}')"""
+            """INSERT INTO rides (route, driver, fare)
+            VALUES ('{}','{}','{}')"""
             .format(self.route, self.driver, self.fare))
         connect.commit()
 
         cursor.execute(
-            """SELECT id FROM rides WHERE driver = '{}' ORDER BY created_at DESC"""
+            """SELECT id FROM rides WHERE driver = '{}'
+            ORDER BY created_at DESC"""
             .format(self.driver))
         record = cursor.fetchone()
         self.id = record[0]
@@ -187,7 +186,8 @@ class RideRequests:
         connect.commit()
 
         cursor.execute(
-            """SELECT * FROM requests WHERE passenger = '{}' ORDER BY created_at DESC;""".format(self.passenger))
+            """SELECT * FROM requests WHERE passenger = '{}'
+            ORDER BY created_at DESC;""".format(self.passenger))
         record = cursor.fetchone()
 
         self.id = record[0]
@@ -199,7 +199,7 @@ class RideRequests:
                     'ride': record[2]
                 }
             return ride_request
-    
+
     @staticmethod
     def get_requests_for_ride(id):
         '''get all ride requests to a specific ride offer'''
