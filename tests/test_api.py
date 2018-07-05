@@ -19,11 +19,7 @@ class RideTestCase(TestCase):
             'fare': 5000
         }
     
-    def tearDown(self):
-        global cursor
-        cursor.execute("DELETE FROM requests")
-        cursor.execute("DELETE FROM rides")
-        cursor.execute("DELETE FROM users")
+   
         
 
     
