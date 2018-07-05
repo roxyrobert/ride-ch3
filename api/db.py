@@ -1,19 +1,13 @@
-
 import psycopg2
-import psycopg2.extras as extra
-from pprint import pprint
-from api import app
 
 
 class DBConnection:
     def __init__(self):
 
-   
-
-    self.connection = psycopg2.connect(dbname="ride", user="roxy", password="1234", host="localhost")
-    self.connection.autocommit = True
-    self.cursor = self.connection.cursor()
-
+        self.connection = psycopg2.connect(dbname="ride", user="roxy", 
+                                           password="1234", host="localhost")
+        self.connection.autocommit = True
+        self.cursor = self.connection.cursor()
 
     def create_tables(self):
 
@@ -50,26 +44,20 @@ class DBConnection:
         )
         for query in queries:
             self.cursor.execute(query)
-    
+
     def delete_tables(self):
         queries = (
             """
-            DELETE TABLE IF EXISTS user CASCADE
+            DROP TABLE IF EXISTS users CASCADE
             """,
 
             """
-            DELETE TABLE IF EXISTS rides CASCADE
+            DROP TABLE IF EXISTS rides CASCADE
             """,
 
             """
-            DELETE TABLE IF EXISTS requests CASCADE
+            DROP TABLE IF EXISTS requests CASCADE
             """
         )
         for query in queries:
             self.cursor.execute(query)
-
-
-
-if __name__ == "__main__":
-    db = DBConnection()
-    db.create_tables()
