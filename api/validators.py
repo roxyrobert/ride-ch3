@@ -30,8 +30,7 @@ create_ride_schema = {
     "properties": {
         "route": {"type": "string", "maxLength": 10,
             "minLength": 3},
-        "driver": {"type": "string", "maxLength": 10,
-            "minLength": 1},
+        "driver": {"type": "integer", "multipleOf": 1.0, "minimum": 1},
         "fare": {"type": "integer"}
     },
     "required": ["route", "driver", "fare"]
@@ -40,10 +39,15 @@ create_ride_schema = {
 join_ride_schema = {
     "type": "object",
     "properties": {
-        "passenger": {"type": "string", "maxLength": 10,
-            "minLength": 1},
-        "ride": {"type": "string", "maxLength": 10,
-            "minLength": 1}
+        "passenger": {"type": "integer", "multipleOf": 1.0, "minimum": 1},
+        "ride": {"type": "integer", "multipleOf": 1.0, "minimum": 1}
     },
     "required": ["passenger", "ride"]
+}
+
+status_schema = {
+    "type": "object",
+    "properties": {
+        "status": {"type": "boolean"}
+    }
 }
