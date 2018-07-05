@@ -2,41 +2,69 @@
 import json
 from api import app
 from flask_testing import TestCase
+from api.db import DBConnection
 
+connect = DBConnection()
+cursor = connect.cursor
 
 class RideTestCase(TestCase):
+
     def setUp(self):
+        global cursor
+        app.config['TESTING'] = True
+
         self.sample_data = {
             'route': 'Kampala',
             'driver': '1',
             'fare': 5000
         }
     
+    def tearDown(self):
+        global cursor
+        cursor.execute("DELETE FROM requests")
+        cursor.execute("DELETE FROM rides")
+        cursor.execute("DELETE FROM users")
+        
+
+    
     def create_app(self):
         #initialize the test client
         return app
 
     def test_create_ride(self):
+        self.sample_data = {
+            'username': 'robert',
+            'email': 'roxy@testmail.com',
+            'password': '1234',
+            'contact': 4701-811121
+        }
+        res = self.client.post(
+            '/auth/signup',
+            data=json.dumps(self.sample_data),
+            content_type='application/json'
+        )
+
+        self.sample_data = {
+            'route': 'Kampala',
+            'driver': 1,
+            'fare': 5000
+        }
         res = self.client.post(
             '/api/v1/rides',
             data=json.dumps(self.sample_data),
             content_type='application/json'
         )
         res_data = json.loads(res.data.decode())
-        print(res_data)
-        # assert keys
         self.assertIn('status', res_data)
         self.assertIn('message', res_data)
         self.assertIn('_id', res_data)
-        # assert expected data
         self.assertEqual(res_data['status'], 'OK')
-        # assert expected status code
         self.assertEqual(res.status_code, 201)
 
     def test_create_ride_with_invalid_data(self):
         self.sample_data = {
             'route': 123,
-            'driver': 156,
+            'driver': 0,
             'fare': "5000"
         }
         res = self.client.post(
@@ -45,12 +73,9 @@ class RideTestCase(TestCase):
             content_type='application/json'
         )
         res_data = json.loads(res.data.decode())
-        # assert keys
         self.assertIn('status', res_data)
         self.assertIn('message', res_data)
-        # assert expected data
         self.assertEqual(res_data['status'], 'fail')
-        # assert expected status code
         self.assertEqual(res.status_code, 400)
         self.assertNotEqual(res.status_code, 201)
 
@@ -199,7 +224,7 @@ class RideTestCase(TestCase):
         # assert keys
         self.assertIn('status', res_data)
         self.assertIn('message', res_data)
-    
+
     def test_get_requests_by_id(self):
         self.sample_data = {
             'passenger': '1',
