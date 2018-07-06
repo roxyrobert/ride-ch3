@@ -91,6 +91,16 @@ class RideTestCase(TestCase):
                          data=json.dumps(self.sample_data),
                          content_type='application/json')
         self.sample_data = {
+            'email': 'tester@mail.com',
+            'password': '12345678'
+        }
+        res = self.client.post('/api/v1/auth/login',
+                               data=json.dumps(self.sample_data),
+                               content_type='application/json')
+        res_data = json.loads(res.data.decode())
+        token = res_data["access_token"]
+        
+        self.sample_data = {
             'route': 'Kampala',
             'driver': 1,
             'fare': 5000
@@ -98,7 +108,8 @@ class RideTestCase(TestCase):
         res = self.client.post(
             '/api/v1/rides',
             data=json.dumps(self.sample_data),
-            content_type='application/json'
+            content_type='application/json',
+            headers=dict(Authorization= Bearer + token)
         )
 
         res = self.client.post('/api/v1/rides', 
